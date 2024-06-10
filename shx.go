@@ -9,11 +9,23 @@ import (
 var defaultShell = "/bin/sh"
 
 func FD_(args string) ([]string, error) {
-	lst, err := stringarray("fd --print0 "+args, 0x00)
+	lst, err := stringarray("", "fd --print0 "+args, 0x00)
 	if err != nil {
 		return nil, err
 	}
 	return removelastemptystring(lst), nil
+}
+
+func FZF_(stdin, args string) ([]string, error) {
+	lst, err := stringarray(stdin, "fzf --print0 --filter "+args, 0x00)
+	if err != nil {
+		return nil, err
+	}
+	return removelastemptystring(lst), nil
+}
+
+func FZF(stdin, args string) []string {
+	return must1(FZF_(stdin, args))
 }
 
 func FD(args string) []string {
@@ -21,7 +33,7 @@ func FD(args string) []string {
 }
 
 func RG_(args string) ([]string, error) {
-	lst, err := stringarray("rg --no-config --no-filename "+args, '\n')
+	lst, err := stringarray("", "rg --no-config --no-filename "+args, '\n')
 	return removelastemptystring(lst), err
 }
 
@@ -30,7 +42,7 @@ func RG(args string) []string {
 }
 
 func RGFile_(args string) ([]string, error) {
-	lst, err := stringarray("rg --no-config --files-with-matches "+args, '\n')
+	lst, err := stringarray("", "rg --no-config --files-with-matches "+args, '\n')
 	return removelastemptystring(lst), err
 }
 
@@ -38,10 +50,15 @@ func RGFile(args string) []string {
 	return must1(RGFile_(args))
 }
 
-func stringarray(command string, seperator byte) ([]string, error) {
+func stringarray(stdin string, command string, seperator byte) ([]string, error) {
 	cmd := exec.Command(defaultShell, "-c", command)
 	buf := &bytes.Buffer{}
 	cmd.Stdout = buf
+
+	if stdin != "" {
+		cmd.Stdin = bytes.NewBufferString(stdin)
+	}
+
 	err := cmd.Run()
 	if err != nil {
 		return nil, err

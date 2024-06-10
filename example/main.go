@@ -29,4 +29,18 @@ func main() {
 			log.Printf("%s\n", file)
 		}
 	}
+
+	log.Println("-----")
+
+	{
+		match := shx.FZF(`
+		err hello
+		err 1
+		err 2
+		`, "2")
+		for _, file := range match {
+			log.Printf("%s\n", file)
+		}
+	}
+
 }
