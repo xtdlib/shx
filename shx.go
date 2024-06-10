@@ -20,6 +20,24 @@ func FD(args string) []string {
 	return must1(FD_(args))
 }
 
+func RG_(args string) ([]string, error) {
+	lst, err := stringarray("rg --no-config --no-filename "+args, '\n')
+	return removelastemptystring(lst), err
+}
+
+func RG(args string) []string {
+	return must1(RG_(args))
+}
+
+func RGFile_(args string) ([]string, error) {
+	lst, err := stringarray("rg --no-config --files-with-matches "+args, '\n')
+	return removelastemptystring(lst), err
+}
+
+func RGFile(args string) []string {
+	return must1(RGFile_(args))
+}
+
 func stringarray(command string, seperator byte) ([]string, error) {
 	cmd := exec.Command(defaultShell, "-c", command)
 	buf := &bytes.Buffer{}
@@ -43,24 +61,6 @@ func removelastemptystring(lst []string) []string {
 	}
 
 	return lst
-}
-
-func RG_(args string) ([]string, error) {
-	lst, err := stringarray("rg --no-config --no-filename "+args, '\n')
-	return removelastemptystring(lst), err
-}
-
-func RG(args string) []string {
-	return must1(RG_(args))
-}
-
-func RGFile_(args string) ([]string, error) {
-	lst, err := stringarray("rg --no-config --files-with-matches "+args, '\n')
-	return removelastemptystring(lst), err
-}
-
-func RGFile(args string) []string {
-	return must1(RGFile_(args))
 }
 
 func must1[T any](v T, err error) T {
